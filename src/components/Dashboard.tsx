@@ -15,12 +15,6 @@ const statusConfigs = [
     gradient: 'from-amber-400 to-orange-500',
   },
   {
-    status: 'PAYMENT_RECEIVED' as OrderStatus,
-    icon: '💳',
-    title: 'Payment Received',
-    gradient: 'from-emerald-400 to-teal-500',
-  },
-  {
     status: 'KITCHEN_MOVED' as OrderStatus,
     icon: '👨‍🍳',
     title: 'In Kitchen',
@@ -109,7 +103,7 @@ export const Dashboard = () => {
       </div>
 
       <div className="px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
           {statusConfigs.map((config, index) => (
             <StatusCard
               key={config.status}
