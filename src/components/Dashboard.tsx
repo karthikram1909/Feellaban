@@ -44,7 +44,7 @@ export const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<OrderStatus | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus | null>('PENDING_PAYMENT');
 
   const loadOrders = async () => {
     setLoading(true);
@@ -103,36 +103,30 @@ export const Dashboard = () => {
       </div>
 
       <div className="px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
-          {statusConfigs.map((config, index) => (
-            <StatusCard
-              key={config.status}
-              icon={config.icon}
-              title={config.title}
-              count={orders[config.status].length}
-              gradient={config.gradient}
-              isActive={selectedStatus === config.status}
-              onClick={() =>
-                setSelectedStatus(
-                  selectedStatus === config.status ? null : config.status
-                )
-              }
-              delay={index * 0.1}
-            />
-          ))}
-        </div>
-
-        <div className="mb-6">
-          {selectedStatus && (
-            <motion.button
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              onClick={() => setSelectedStatus(null)}
-              className="bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-full hover:bg-slate-50 transition-all duration-300 font-medium shadow-sm"
-            >
-              ← Show All Orders
-            </motion.button>
-          )}
+        <div className="flex justify-center mb-10">
+          <div className="inline-flex bg-slate-100 p-1.5 rounded-xl shadow-inner">
+            {statusConfigs.map((config) => {
+              const isActive = selectedStatus === config.status;
+              return (
+                <button
+                  key={config.status}
+                  onClick={() => setSelectedStatus(config.status)}
+                  className={`
+                    px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200
+                    ${isActive 
+                      ? 'bg-white text-slate-800 shadow-sm ring-1 ring-slate-200' 
+                      : 'text-slate-500 hover:text-slate-700'
+                    }
+                  `}
+                >
+                  {config.title}
+                  <span className={`ml-2 text-xs py-0.5 px-2 rounded-full ${isActive ? 'bg-slate-100 text-slate-600' : 'bg-slate-200 text-slate-500'}`}>
+                    {orders[config.status].length}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {loading ? (
