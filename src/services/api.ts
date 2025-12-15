@@ -68,6 +68,15 @@ export const fetchOrdersByStatus = async (status: OrderStatus): Promise<Order[]>
   }
 };
 
+export const updateOrderStatus = async (orderId: string, status: OrderStatus): Promise<void> => {
+  try {
+    await axios.put(`${BASE_URL}/api/orders/${orderId}/status`, { status });
+  } catch (error) {
+    console.error(`Error updating order ${orderId} status to ${status}:`, error);
+    throw error;
+  }
+};
+
 export const fetchAllOrders = async (): Promise<{
   [key in OrderStatus]: Order[];
 }> => {

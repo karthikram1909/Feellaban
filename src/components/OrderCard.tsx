@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { Order } from '../services/api';
-import { Package, Phone, User } from 'lucide-react';
+import { Order, OrderStatus } from '../services/api';
+import { Package, Phone, User, CheckCircle, ChefHat, Truck, XCircle } from 'lucide-react';
 
 interface OrderCardProps {
   order: Order;
   index: number;
+  onUpdateStatus: (id: string, status: OrderStatus) => void;
 }
 
 const statusConfig: Record<string, { label: string; gradient: string }> = {
@@ -17,8 +18,24 @@ const statusConfig: Record<string, { label: string; gradient: string }> = {
 
 const defaultConfig = { label: 'Pending', gradient: 'from-gray-400 to-gray-500' };
 
-export const OrderCard = ({ order, index }: OrderCardProps) => {
+export const OrderCard = ({ order, index, onUpdateStatus }: OrderCardProps) => {
   const config = statusConfig[order.status] || defaultConfig;
+
+  const getNextAction = () => {
+    switch (order.status) {
+      case 'PENDING_PAYMENT':
+        return { label: 'Mark Paid', status: 'PAYMENT_RECEIVED' as OrderStatus, icon: CheckCircle, color: 'bg-emerald-500 hover:bg-emerald-600' };
+      case 'PAYMENT_RECEIVED':
+        return { label: 'To Kitchen', status: 'KITCHEN_MOVED' as OrderStatus, icon: ChefHat, color: 'bg-blue-500 hover:bg-blue-600' };
+      case 'KITCHEN_MOVED':
+        return { label: 'Delivered', status: 'DELIVERED' as OrderStatus, icon: Truck, color: 'bg-green-500 hover:bg-green-600' };
+      default:
+        return null;
+    }
+  };
+
+  const nextAction = getNextAction();
+  const showCancel = ['PENDING_PAYMENT', 'PAYMENT_RECEIVED', 'KITCHEN_MOVED'].includes(order.status);
 
   return (
     <motion.div
@@ -26,7 +43,7 @@ export const OrderCard = ({ order, index }: OrderCardProps) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
       whileHover={{ y: -4 }}
-      className="bg-white border border-black rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300"
+      className="bg-white border border-black rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full"
     >
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3 text-slate-800">
@@ -40,7 +57,7 @@ export const OrderCard = ({ order, index }: OrderCardProps) => {
         </span>
       </div>
 
-      <div className="space-y-3 mb-4">
+      <div className="space-y-3 mb-4 flex-grow">
         <div className="flex items-center gap-3 text-slate-600">
           <Phone className="w-4 h-4 text-slate-400" />
           <span className="text-sm font-medium">{order.customerPhone}</span>
@@ -64,12 +81,35 @@ export const OrderCard = ({ order, index }: OrderCardProps) => {
         </div>
       </div>
 
-      <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+      <div className="flex justify-between items-center pt-4 border-t border-slate-100 mb-6">
         <span className="text-slate-500 text-sm font-medium">Total</span>
         <span className="text-slate-900 text-xl font-bold">
           ${(order.totalPrice || 0).toFixed(2)}
         </span>
       </div>
+
+      {(nextAction || showCancel) && (
+        <div className="flex gap-3 mt-auto pt-4 border-t border-slate-100">
+          {nextAction && (
+            <button
+              onClick={() => onUpdateStatus(order.id, nextAction.status)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-white font-medium transition-colors ${nextAction.color}`}
+            >
+              <nextAction.icon className="w-4 h-4" />
+              {nextAction.label}
+            </button>
+          )}
+          {showCancel && (
+            <button
+              onClick={() => onUpdateStatus(order.id, 'CANCELLED')}
+              className="px-3 py-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+              title="Cancel Order"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 };

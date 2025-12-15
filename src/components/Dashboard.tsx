@@ -5,7 +5,7 @@ import { OrderCard } from './OrderCard';
 import { LoadingState } from './LoadingState';
 import { EmptyState } from './EmptyState';
 import { ErrorState } from './ErrorState';
-import { fetchAllOrders, Order, OrderStatus } from '../services/api';
+import { fetchAllOrders, updateOrderStatus, Order, OrderStatus } from '../services/api';
 
 const statusConfigs = [
   {
@@ -62,6 +62,16 @@ export const Dashboard = () => {
       setError('Failed to load orders. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStatusUpdate = async (orderId: string, newStatus: OrderStatus) => {
+    try {
+      await updateOrderStatus(orderId, newStatus);
+      await loadOrders();
+    } catch (err) {
+      console.error('Failed to update status:', err);
+      alert('Failed to update order status. Please try again.');
     }
   };
 
@@ -151,7 +161,12 @@ export const Dashboard = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {displayOrders.map((order, index) => (
-              <OrderCard key={order.id} order={order} index={index} />
+              <OrderCard 
+                key={order.id} 
+                order={order} 
+                index={index} 
+                onUpdateStatus={handleStatusUpdate}
+              />
             ))}
           </motion.div>
         )}
