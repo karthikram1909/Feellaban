@@ -26,11 +26,11 @@ export const OrderCard = ({ order, index }: OrderCardProps) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
       whileHover={{ y: -4 }}
-      className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300"
+      className="bg-white border border-black rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300"
     >
       <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-3 text-white">
-          <User className="w-5 h-5 opacity-90" />
+        <div className="flex items-center gap-3 text-slate-800">
+          <User className="w-5 h-5 text-slate-500" />
           <span className="text-xl font-bold tracking-wide">{order.customerName}</span>
         </div>
         <span
@@ -41,32 +41,32 @@ export const OrderCard = ({ order, index }: OrderCardProps) => {
       </div>
 
       <div className="space-y-3 mb-4">
-        <div className="flex items-center gap-3 text-white/90">
-          <Phone className="w-4 h-4 opacity-80" />
+        <div className="flex items-center gap-3 text-slate-600">
+          <Phone className="w-4 h-4 text-slate-400" />
           <span className="text-sm font-medium">{order.customerPhone}</span>
         </div>
       </div>
 
-      <div className="border-t border-white/10 pt-4 mb-4">
-        <div className="flex items-center gap-2 text-white/70 mb-3">
+      <div className="border-t border-slate-100 pt-4 mb-4">
+        <div className="flex items-center gap-2 text-slate-500 mb-3">
           <Package className="w-4 h-4" />
           <span className="text-xs font-medium">Items</span>
         </div>
         <div className="space-y-2">
           {(order.items || []).map((item, idx) => (
             <div key={idx} className="flex justify-between items-center text-sm">
-              <span className="text-white font-semibold text-base">
+              <span className="text-slate-800 font-semibold text-base">
                 {item.quantity}x {item.name}
               </span>
-              <span className="text-white/60">${(item.price || 0).toFixed(2)}</span>
+              <span className="text-slate-500">${(item.price || 0).toFixed(2)}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex justify-between items-center pt-4 border-t border-white/10">
-        <span className="text-white/70 text-sm font-medium">Total</span>
-        <span className="text-white text-xl font-bold">
+      <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+        <span className="text-slate-500 text-sm font-medium">Total</span>
+        <span className="text-slate-900 text-xl font-bold">
           ${(order.totalPrice || 0).toFixed(2)}
         </span>
       </div>

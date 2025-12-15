@@ -50,13 +50,9 @@ export const StatusCard = ({
       onClick={onClick}
       className={`
         relative cursor-pointer overflow-hidden rounded-2xl p-6
-        backdrop-blur-lg bg-white/10 border border-white/20
-        shadow-xl transition-all duration-300
-        ${isActive ? 'ring-2 ring-white/50 shadow-2xl' : ''}
+        shadow-lg transition-all duration-300 bg-gradient-to-br ${gradient}
+        ${isActive ? 'ring-4 ring-blue-300 scale-105' : 'hover:scale-105'}
       `}
-      style={{
-        background: `linear-gradient(135deg, ${gradient})`,
-      }}
     >
       <div className="relative z-10">
         <div className="text-4xl mb-3">{icon}</div>
