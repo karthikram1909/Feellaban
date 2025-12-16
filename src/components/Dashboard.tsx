@@ -127,15 +127,15 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
                   className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 overflow-hidden"
                 >
                   <div className="px-4 py-3 border-b border-slate-50 mb-1">
-                    <p className="text-sm font-semibold text-slate-800">Jeeva</p>
-                    <p className="text-xs text-slate-500">owner@feellaban.com</p>
+                    <p className="text-sm font-semibold text-slate-800">Admin</p>
+                    {/* <p className="text-xs text-slate-500">owner@feellaban.com</p> */}
                   </div>
                   
-                  <button className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2 transition-colors">
+                  {/* <button className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2 transition-colors">
                     <UserCircle className="w-4 h-4" />
                     My Profile
                   </button>
-                  
+                   */}
                   <button 
                     onClick={onLogout}
                     className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"

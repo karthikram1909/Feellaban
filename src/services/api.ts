@@ -101,3 +101,15 @@ export const fetchAllOrders = async (): Promise<{
     return acc;
   }, {} as { [key in OrderStatus]: Order[] });
 };
+
+export const login = async (username: string, password: string): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await axios.post(`${BASE_URL}/api/login`, { username, password });
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    throw error;
+  }
+};

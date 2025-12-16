@@ -1,30 +1,38 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { login } from '../services/api';
 
 interface LoginProps {
   onLogin: () => void;
-  onNavigateToRegister: () => void;
 }
 
-export const Login = ({ onLogin, onNavigateToRegister }: LoginProps) => {
-  const [email, setEmail] = useState('');
+export const Login = ({ onLogin }: LoginProps) => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isShaking, setIsShaking] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (email === 'karthik@gmail.com' && password === '12345') {
-      onLogin();
-    } else {
-      setError('Invalid email or password');
+    try {
+      const response = await login(username, password);
+      if (response.success) {
+        onLogin();
+      } else {
+        setError(response.message || 'Invalid username or password');
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 500);
+      }
+    } catch (err) {
+      setError('An error occurred during login. Please try again.');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+    } finally {
       setLoading(false);
     }
   };
@@ -38,7 +46,7 @@ export const Login = ({ onLogin, onNavigateToRegister }: LoginProps) => {
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : { opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="bg-white rounded-3xl shadow-xl w-full max-w-md p-8 relative z-10"
       >
@@ -59,16 +67,16 @@ export const Login = ({ onLogin, onNavigateToRegister }: LoginProps) => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700 ml-1">Email Address</label>
+            <label className="text-sm font-medium text-slate-700 ml-1">Username</label>
             <div className="relative group">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
               <input
-                type="email"
+                type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                placeholder="Enter your email"
+                placeholder="Enter your username"
               />
             </div>
           </div>
@@ -115,18 +123,6 @@ export const Login = ({ onLogin, onNavigateToRegister }: LoginProps) => {
             )}
           </motion.button>
         </form>
-
-        <div className="mt-8 text-center">
-          <p className="text-slate-500 text-sm">
-            Don't have an account?{' '}
-            <button
-              onClick={onNavigateToRegister}
-              className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors"
-            >
-              Create Account
-            </button>
-          </p>
-        </div>
       </motion.div>
     </div>
   );
