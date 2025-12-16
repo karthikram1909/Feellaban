@@ -75,6 +75,10 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
         try {
           const payload: WSOrder = JSON.parse(event.data);
           
+          // Play notification sound
+          const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+          audio.play().catch(e => console.error('Audio play failed:', e));
+
           // Map WS payload to internal Order type
           const newOrder: Order = {
             id: `ws-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Temp ID
@@ -264,9 +268,11 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
         ) : displayOrders.length === 0 ? (
           <EmptyState
             message={
-              selectedStatus
-                ? `No orders with status: ${selectedStatus.replace(/_/g, ' ').toLowerCase()}`
-                : 'No orders available at the moment'
+              selectedStatus === 'PENDING_PAYMENT' ? 'Waiting for new orders...' :
+              selectedStatus === 'KITCHEN_MOVED' ? 'No orders in kitchen' :
+              selectedStatus === 'DELIVERED' ? 'No delivered orders yet' :
+              selectedStatus === 'CANCELLED' ? 'No cancelled orders' :
+              'No orders available'
             }
           />
         ) : (
