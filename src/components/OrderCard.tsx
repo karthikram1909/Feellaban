@@ -73,7 +73,7 @@ export const OrderCard = ({ order, index, onUpdateStatus }: OrderCardProps) => {
               <span className="text-slate-800 font-semibold text-base">
                 {item.quantity}x {item.name}
               </span>
-              <span className="text-slate-500">${(item.price || 0).toFixed(2)}</span>
+              <span className="text-slate-500">₹{(item.price || 0).toFixed(2)}</span>
             </div>
           ))}
         </div>
@@ -82,7 +82,7 @@ export const OrderCard = ({ order, index, onUpdateStatus }: OrderCardProps) => {
       <div className="flex justify-between items-center pt-4 border-t border-slate-100 mb-6">
         <span className="text-slate-500 text-sm font-medium">Total</span>
         <span className="text-slate-900 text-xl font-bold">
-          ${(order.totalPrice || 0).toFixed(2)}
+          ₹{(order.totalPrice || 0).toFixed(2)}
         </span>
       </div>
 

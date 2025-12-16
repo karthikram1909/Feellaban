@@ -1,40 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { StatusCard } from './StatusCard';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { OrderCard } from './OrderCard';
 import { LoadingState } from './LoadingState';
 import { EmptyState } from './EmptyState';
 import { ErrorState } from './ErrorState';
 import { fetchAllOrders, updateOrderStatus, Order, OrderStatus } from '../services/api';
+import { User, LogOut, ChevronDown, UserCircle } from 'lucide-react';
 
 const statusConfigs = [
   {
     status: 'PENDING_PAYMENT' as OrderStatus,
-    icon: '🕒',
     title: 'Pending Payment',
-    gradient: 'from-amber-400 to-orange-500',
   },
   {
     status: 'KITCHEN_MOVED' as OrderStatus,
-    icon: '👨‍🍳',
     title: 'In Kitchen',
-    gradient: 'from-blue-400 to-cyan-500',
   },
   {
     status: 'DELIVERED' as OrderStatus,
-    icon: '🚚',
     title: 'Delivered',
-    gradient: 'from-green-400 to-emerald-600',
   },
   {
     status: 'CANCELLED' as OrderStatus,
-    icon: '❌',
     title: 'Cancelled',
-    gradient: 'from-red-400 to-rose-500',
   },
 ];
 
-export const Dashboard = () => {
+interface DashboardProps {
+  onLogout: () => void;
+}
+
+export const Dashboard = ({ onLogout }: DashboardProps) => {
   const [orders, setOrders] = useState<{ [key in OrderStatus]: Order[] }>({
     PENDING_PAYMENT: [],
     PAYMENT_RECEIVED: [],
@@ -45,6 +41,18 @@ export const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | null>('PENDING_PAYMENT');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -86,7 +94,7 @@ export const Dashboard = () => {
     <div className="min-h-screen bg-white pb-20">
       {/* Header */}
       <div className="bg-blue-600 shadow-lg sticky top-0 z-30 mb-8">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 h-20 flex items-center justify-center">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 h-20 flex items-center justify-center relative">
           <div className="flex items-center gap-4">
             <motion.img 
               initial={{ opacity: 0, scale: 0.9 }}
@@ -98,6 +106,46 @@ export const Dashboard = () => {
             <h1 className="text-white text-4xl md:text-5xl font-bold" style={{ fontFamily: "'Dancing Script', cursive" }}>
               Feel Laban
             </h1>
+          </div>
+
+          <div className="absolute right-4 md:right-8 lg:right-12" ref={menuRef}>
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2.5 transition-colors backdrop-blur-sm"
+              title="Profile"
+            >
+              <User className="w-6 h-6" />
+            </button>
+
+            <AnimatePresence>
+              {showProfileMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 overflow-hidden"
+                >
+                  <div className="px-4 py-3 border-b border-slate-50 mb-1">
+                    <p className="text-sm font-semibold text-slate-800">Jeeva</p>
+                    <p className="text-xs text-slate-500">owner@feellaban.com</p>
+                  </div>
+                  
+                  <button className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2 transition-colors">
+                    <UserCircle className="w-4 h-4" />
+                    My Profile
+                  </button>
+                  
+                  <button 
+                    onClick={onLogout}
+                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
