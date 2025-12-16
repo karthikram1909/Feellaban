@@ -26,7 +26,7 @@ export const OrderCard = ({ order, index, onUpdateStatus }: OrderCardProps) => {
       case 'PENDING_PAYMENT':
         return { label: 'Mark Paid', status: 'KITCHEN_MOVED' as OrderStatus, icon: CheckCircle, color: 'bg-emerald-500 hover:bg-emerald-600' };
       case 'KITCHEN_MOVED':
-        return { label: 'Delivered', status: 'DELIVERED' as OrderStatus, icon: Truck, color: 'bg-green-500 hover:bg-green-600' };
+        return { label: 'Ready for Delivery', status: 'DELIVERED' as OrderStatus, icon: Truck, color: 'bg-green-500 hover:bg-green-600' };
       default:
         return null;
     }
