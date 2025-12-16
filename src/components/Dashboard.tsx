@@ -30,6 +30,21 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
+// WebSocket Payload Interface
+interface WSOrder {
+  customer_name: string;
+  customer_phone: string;
+  items: Array<{
+    product_name: string;
+    quantity: number;
+    price: number;
+    total: number;
+  }>;
+  grand_total: number;
+  currency: string;
+  status: OrderStatus;
+}
+
 export const Dashboard = ({ onLogout }: DashboardProps) => {
   const [orders, setOrders] = useState<{ [key in OrderStatus]: Order[] }>({
     PENDING_PAYMENT: [],
@@ -43,6 +58,71 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | null>('PENDING_PAYMENT');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // WebSocket Connection
+  useEffect(() => {
+    let ws: WebSocket | null = null;
+    let reconnectTimeout: NodeJS.Timeout;
+
+    const connectWebSocket = () => {
+      ws = new WebSocket('wss://savetron.2440066.xyz/ws/orders');
+
+      ws.onopen = () => {
+        console.log('Connected to Orders WebSocket');
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const payload: WSOrder = JSON.parse(event.data);
+          
+          // Map WS payload to internal Order type
+          const newOrder: Order = {
+            id: `ws-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Temp ID
+            status: 'PENDING_PAYMENT', // Default to Pending Payment as requested
+            customerName: payload.customer_name,
+            customerPhone: payload.customer_phone,
+            items: payload.items.map(item => ({
+              name: item.product_name,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            totalPrice: payload.grand_total,
+            createdAt: new Date().toISOString()
+          };
+
+          // Append to PENDING_PAYMENT
+          setOrders(prev => ({
+            ...prev,
+            PENDING_PAYMENT: [newOrder, ...prev.PENDING_PAYMENT]
+          }));
+          
+        } catch (err) {
+          console.error('Failed to parse WebSocket message:', err);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket disconnected. Reconnecting in 3s...');
+        reconnectTimeout = setTimeout(connectWebSocket, 3000);
+      };
+      
+      ws.onerror = (err) => {
+        console.error('WebSocket error:', err);
+        ws?.close();
+      };
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (ws) {
+        ws.onclose = null; // Prevent reconnect loop
+        ws.onerror = null;
+        ws.close();
+      }
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
