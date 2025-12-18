@@ -2,6 +2,18 @@ import axios from 'axios';
 
 const BASE_URL = 'https://one.2440066.xyz/feellaban-api';
 
+export const setupAxiosInterceptors = (onUnauthorized: () => void) => {
+  axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response && error.response.status === 401) {
+        onUnauthorized();
+      }
+      return Promise.reject(error);
+    }
+  );
+};
+
 export type OrderStatus =
   | 'PENDING_PAYMENT'
   | 'PAYMENT_RECEIVED'

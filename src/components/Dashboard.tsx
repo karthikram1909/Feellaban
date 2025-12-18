@@ -163,6 +163,14 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
 
   useEffect(() => {
     loadOrders();
+
+    // Heartbeat: Keep session alive by fetching data every 5 minutes
+    const heartbeatInterval = setInterval(() => {
+      console.log('Heartbeat: Keeping session alive');
+      loadOrders();
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(heartbeatInterval);
   }, []);
 
   const getDisplayOrders = (): Order[] => {
