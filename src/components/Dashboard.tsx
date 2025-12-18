@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { OrderCard } from './OrderCard';
 import { LoadingState } from './LoadingState';
@@ -74,32 +74,15 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
       ws.onmessage = (event) => {
         try {
           const payload: WSOrder = JSON.parse(event.data);
+          console.log('New order received via WS:', payload.customer_name);
           
           // Play notification sound
           const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
           audio.play().catch(e => console.error('Audio play failed:', e));
 
-          // Map WS payload to internal Order type
-          const newOrder: Order = {
-            id: `ws-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Temp ID
-            status: 'PENDING_PAYMENT', // Default to Pending Payment as requested
-            customerName: payload.customer_name,
-            customerPhone: payload.customer_phone,
-            items: payload.items.map(item => ({
-              name: item.product_name,
-              quantity: item.quantity,
-              price: item.price
-            })),
-            totalPrice: payload.grand_total,
-            createdAt: new Date().toISOString()
-          };
-
-          // Append to PENDING_PAYMENT
-          setOrders(prev => ({
-            ...prev,
-            PENDING_PAYMENT: [newOrder, ...prev.PENDING_PAYMENT]
-          }));
-          
+          // Refresh orders from server to get the real ID
+          // Pass false to avoid showing the full-screen loading spinner
+          loadOrdersRef.current(false);
         } catch (err) {
           console.error('Failed to parse WebSocket message:', err);
         }
@@ -138,18 +121,27 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const loadOrders = async () => {
-    setLoading(true);
+  const loadOrders = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     setError(null);
     try {
       const data = await fetchAllOrders();
       setOrders(data);
     } catch (err) {
-      setError('Failed to load orders. Please try again.');
+      console.error('Failed to load orders:', err);
+      // Only set error if we're in a loading state (initial load), otherwise just log it
+      if (showLoading) setError('Failed to load orders. Please try again.');
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
-  };
+  }, []);
+
+  // Ref to access the latest loadOrders function inside the WebSocket effect
+  // without triggering a re-connection when loadOrders changes
+  const loadOrdersRef = useRef(loadOrders);
+  useEffect(() => {
+    loadOrdersRef.current = loadOrders;
+  }, [loadOrders]);
 
   const handleStatusUpdate = async (orderId: string, newStatus: OrderStatus) => {
     try {
